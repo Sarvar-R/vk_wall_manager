@@ -3,34 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VK token debug</title>
+  <title>VK Token Getter</title>
 </head>
 <body>
-  <button id="btn">Получить user token</button>
-  <pre id="out" style="white-space: pre-wrap; word-break: break-word;"></pre>
+  <h1>Получение user access token</h1>
+  <button id="getTokenBtn">Получить токен</button>
+  <pre id="result" style="white-space: pre-wrap; word-break: break-word;"></pre>
 
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
   <script>
-    const APP_ID = 54536138; // <-- твой app_id
-    const out = document.getElementById("out");
+    const APP_ID = 54536138; // <-- сюда вставь app_id своего mini app
+    const SCOPES = "wall,photos,groups";
 
-    document.getElementById("btn").onclick = async () => {
+    const result = document.getElementById("result");
+    const btn = document.getElementById("getTokenBtn");
+
+    async function init() {
       try {
-        out.textContent = "VKWebAppInit...\n";
         await vkBridge.send("VKWebAppInit");
-        out.textContent += "OK\n\n";
+        result.textContent = "VK Bridge инициализирован. Нажми кнопку.";
+      } catch (e) {
+        result.textContent = "Ошибка инициализации VK Bridge: " + JSON.stringify(e, null, 2);
+      }
+    }
 
-        out.textContent += "VKWebAppGetAuthToken...\n";
+    async function getToken() {
+      try {
         const data = await vkBridge.send("VKWebAppGetAuthToken", {
           app_id: APP_ID,
-          scope: "wall,photos,groups"
+          scope: SCOPES
         });
 
-        out.textContent += JSON.stringify(data, null, 2);
+        result.textContent =
+          "ACCESS TOKEN:\\n\\n" + data.access_token +
+          "\\n\\nSCOPE:\\n" + data.scope;
       } catch (e) {
-        out.textContent += "ERROR:\n" + JSON.stringify(e, null, 2);
+        result.textContent = "Ошибка получения токена:\\n" + JSON.stringify(e, null, 2);
       }
-    };
+    }
+
+    btn.addEventListener("click", getToken);
+    init();
   </script>
 </body>
 </html>
